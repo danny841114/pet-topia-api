@@ -15,7 +15,6 @@ import petTopia.dto.vendor.request.AddReviewRequest;
 import petTopia.dto.vendor.request.AddReviewStarRequest;
 import petTopia.dto.vendor.request.ModifyReviewRequest;
 import petTopia.dto.vendor.response.VendorReviewInfo;
-import petTopia.model.vendor.Vendor;
 import petTopia.model.vendor.VendorReview;
 import petTopia.service.vendor.ReviewPhotoService;
 import petTopia.service.vendor.VendorReviewService;
@@ -28,9 +27,9 @@ public class VendorReviewController {
     private final ReviewPhotoService reviewPhotoService;
 
     @GetMapping("/{vendorId}/review")
-    public ResponseEntity<List<VendorReviewInfo>> getVendorReview(@PathVariable Integer vendorId) {
-        List<VendorReviewInfo> reviewList = vendorReviewService.findReviewListByVendorId(vendorId);
-        return ResponseEntity.ok(reviewList);
+    public ResponseEntity<List<VendorReviewInfo>> getVendorReviews(@PathVariable Integer vendorId) {
+        List<VendorReviewInfo> reviews = vendorReviewService.findReviewListByVendorId(vendorId);
+        return ResponseEntity.ok(reviews);
     }
 
     @GetMapping(path = "/{vendorId}/review/{reviewId}/photo/{photoId}", produces = MediaType.IMAGE_JPEG_VALUE)

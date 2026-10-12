@@ -1,7 +1,6 @@
 package petTopia.dto.vendor.response;
 
 import lombok.*;
-import petTopia.model.vendor.ReviewPhoto;
 import petTopia.model.vendor.VendorReview;
 
 import java.util.Date;
@@ -21,6 +20,7 @@ public class VendorReviewInfo {
     private Integer ratingService;
     private List<String> photoUrls;
     private MemberInfo member;
+    private VendorInfo vendor;
 
     @Getter
     @Setter
@@ -33,15 +33,32 @@ public class VendorReviewInfo {
         private String photoUrl;
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VendorInfo {
+        private Integer id;
+        private String name;
+    }
+
     public static VendorReviewInfo fromEntity(VendorReview review) {
         Integer memberId = review.getMember().getId();
-        VendorReviewInfo.MemberInfo memberInfo = MemberInfo.builder()
+        MemberInfo memberInfo = MemberInfo.builder()
                 .id(memberId)
                 .name(review.getMember().getName())
                 .photoUrl("/api/member/" + memberId + "/photo")
                 .build();
 
-        String endpoint = "/api/vendor/" + review.getVendor().getId() + "/review/" + review.getId() + "/photo/";
+        Integer vendorId = review.getVendor().getId();
+        String vendorName = review.getVendor().getName();
+        VendorInfo vendorInfo = VendorInfo.builder()
+                .id(vendorId)
+                .name(vendorName)
+                .build();
+
+        String endpoint = "/api/vendor/" + vendorId + "/review/" + review.getId() + "/photo/";
         List<String> photoUrls = review.getReviewPhotos()
                 .stream()
                 .map(photo -> endpoint + photo.getId())
@@ -56,6 +73,7 @@ public class VendorReviewInfo {
                 .ratingService(review.getRatingService())
                 .photoUrls(photoUrls)
                 .member(memberInfo)
+                .vendor(vendorInfo)
                 .build();
     }
 }

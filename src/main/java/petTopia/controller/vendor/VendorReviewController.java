@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import petTopia.dto.vendor.VendorDto;
 import petTopia.dto.vendor.VendorReviewPhotoDto;
 import petTopia.dto.vendor.request.AddReviewRequest;
 import petTopia.dto.vendor.request.AddReviewStarRequest;
@@ -41,9 +42,9 @@ public class VendorReviewController {
     }
 
     @GetMapping("/{vendorId}/update/rating")
-    public ResponseEntity<Vendor> updateVendorRating(@PathVariable Integer vendorId) {
-        Vendor vendor = vendorReviewService.setAverageRating(vendorId);
-        return ResponseEntity.ok(vendor);
+    public ResponseEntity<VendorDto> updateVendorRating(@PathVariable Integer vendorId) {
+        VendorDto vendorDto = vendorReviewService.setAverageRating(vendorId);
+        return ResponseEntity.ok(vendorDto);
     }
 
     @GetMapping("/review/{reviewId}")

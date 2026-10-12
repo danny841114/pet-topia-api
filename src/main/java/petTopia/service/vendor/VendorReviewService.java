@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import petTopia.dto.vendor.VendorDto;
 import petTopia.dto.vendor.request.AddReviewRequest;
 import petTopia.dto.vendor.request.AddReviewStarRequest;
 import petTopia.dto.vendor.request.ModifyReviewRequest;
@@ -163,7 +164,7 @@ public class VendorReviewService {
 
     /* 計算單一店家評分之平均數 */
     @Transactional
-    public Vendor setAverageRating(Integer vendorId) {
+    public VendorDto setAverageRating(Integer vendorId) {
         Vendor vendor = vendorRepository.findById(vendorId)
                 .orElseThrow(() -> new EntityNotFoundException("Vendor not found"));
 
@@ -172,7 +173,7 @@ public class VendorReviewService {
                 .filter(review -> review.getRatingEnvironment() != null
                         && review.getRatingPrice() != null
                         && review.getRatingService() != null)
-                .collect(Collectors.toList());
+                .toList();
 
         int sumRatingEnvironment = 0;
         int sumRatingPrice = 0;
@@ -204,7 +205,8 @@ public class VendorReviewService {
         vendor.setAvgRatingService(avgRatingService);
         vendor.setTotalRating(avgRatingAll);
 
-        return vendorRepository.save(vendor);
+        Vendor savedVendor = vendorRepository.save(vendor);
+        return VendorDto.fromEntity(savedVendor);
     }
 
     /* 尋找某會員是否有對某店家留下評論 */

@@ -33,6 +33,7 @@ public class VendorActivityReviewService {
         List<VendorActivityReview> reviewList = vendorActivityReviewRepository.findByVendorActivityId(activityId);
 
         return reviewList.stream()
+                .filter(review -> review.getMemberId() != null)
                 .map(this::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -106,6 +107,8 @@ public class VendorActivityReviewService {
     }
 
     private ActivityReviewDetail fromEntity(VendorActivityReview review) {
+        if (review.getMemberId() == null) throw new EntityNotFoundException("Member ID is null");
+
         Member member = memberRepository.findById(review.getMemberId())
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
 

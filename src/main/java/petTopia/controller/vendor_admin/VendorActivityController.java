@@ -7,6 +7,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import petTopia.dto.vendor_admin.TopActivityDTO;
@@ -66,11 +67,8 @@ public class VendorActivityController {
         return ResponseEntity.ok(conflictExists);
     }
 
-    // TODO: 2026-08-06 Modify API spec, front-end not fixed
-    //  REQUEST PARAM TO BODY
-    //  CREATED need to guide to source
-    @PostMapping("/add")
-    public ResponseEntity<Void> addActivity(@RequestBody AddActivityRequest request) throws IOException {
+    @PostMapping(value = "/add", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> addActivity(@ModelAttribute AddActivityRequest request) throws IOException {
         vendorActivityServiceAdmin.addActivity(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

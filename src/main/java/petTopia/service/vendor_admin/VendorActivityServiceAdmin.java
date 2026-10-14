@@ -225,7 +225,7 @@ public class VendorActivityServiceAdmin {
     }
 
     @Transactional
-    public CalendarEvent updateActivity(UpdateActivityRequest request) throws IOException {
+    public void updateActivity(UpdateActivityRequest request) throws IOException {
         Integer activityId = request.getActivityId();
 
         VendorActivity vendorActivity = vendorActivityRepository.findById(activityId)
@@ -283,9 +283,7 @@ public class VendorActivityServiceAdmin {
             calendarEvent.setEndTime(request.getEndTime());
             calendarEvent.setUpdatedAt(new Date());
 
-            return calendarEventRepository.save(calendarEvent);
-        } else {
-            return null;
+            calendarEventRepository.save(calendarEvent);
         }
     }
 

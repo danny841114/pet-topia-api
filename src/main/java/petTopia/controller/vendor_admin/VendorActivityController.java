@@ -73,14 +73,10 @@ public class VendorActivityController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // TODO: 2026-08-06 Modify API spec, front-end not fixed
-    //  POST TO PUT
-    //  REQUEST PARAM TO BODY
-    //  Unify parameters naming to camel case
     @PutMapping("/update")
-    public ResponseEntity<CalendarEvent> updateActivity(@RequestBody UpdateActivityRequest request) throws IOException {
-        CalendarEvent calendarEvent = vendorActivityServiceAdmin.updateActivity(request);
-        return ResponseEntity.ok(calendarEvent);
+    public ResponseEntity<Void> updateActivity(@ModelAttribute UpdateActivityRequest request) throws IOException {
+        vendorActivityServiceAdmin.updateActivity(request);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/activity/{vendorId}")

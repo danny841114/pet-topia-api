@@ -90,8 +90,10 @@ public class VendorActivityRegistrationService {
     }
 
     @Transactional
-    public void sendNotification(Integer memberId, NotificationRequest request) {
-        ActivityRegistration registration = activityRegistrationRepository.findByMemberIdAndVendorActivityId(memberId, request.getActivityId())
+    public void sendNotification(NotificationRequest request) {
+        Integer memberId = request.getMemberId();
+        Integer activityId = request.getActivityId();
+        ActivityRegistration registration = activityRegistrationRepository.findByMemberIdAndVendorActivityId(memberId, activityId)
                 .orElseThrow(() -> new EntityNotFoundException("Activity registration not found"));
 
         Notification notification = new Notification();

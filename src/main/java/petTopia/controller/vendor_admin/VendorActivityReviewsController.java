@@ -1,7 +1,6 @@
 package petTopia.controller.vendor_admin;
 
 import java.util.List;
-import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +14,15 @@ import petTopia.service.vendor.VendorActivityReviewService;
 public class VendorActivityReviewsController {
     private final VendorActivityReviewService vendorActivityReviewService;
 
-    @GetMapping("/activityreviews")
-    public ResponseEntity<List<ActivityReviewDto>> getReviews(@RequestParam Integer vendorActivityId) {
-        List<ActivityReviewDto> reviews = vendorActivityReviewService.getReviewsByActivityId(vendorActivityId);
+    @GetMapping("/activity-reviews")
+    public ResponseEntity<List<ActivityReviewDto>> getReviews(@RequestParam Integer activityId) {
+        List<ActivityReviewDto> reviews = vendorActivityReviewService.getReviewsByActivityId(activityId);
         return ResponseEntity.ok(reviews);
     }
 
-    @DeleteMapping("/activityreviews/delete/{reviewId}")
-    public ResponseEntity<Map<String, String>> deleteReview(@PathVariable Integer reviewId) {
+    @DeleteMapping("/activity-reviews/{reviewId}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Integer reviewId) {
         vendorActivityReviewService.deleteReviewById(reviewId);
-        return ResponseEntity.ok(Map.of("message", "刪除成功"));
+        return ResponseEntity.ok().build();
     }
 }

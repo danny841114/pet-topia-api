@@ -62,7 +62,7 @@ public class MemberController {
         try {
             Member existingMember = getMemberViaUserViaEmail();
             memberService.updateProfile(existingMember, request);
-            return ResponseEntity.ok(Map.of("message", "會員資料更新成功"));
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("更新會員資料失敗", e);
             return ResponseEntity.internalServerError()
@@ -75,7 +75,7 @@ public class MemberController {
         try {
             Member member = getMemberViaUserViaEmail();
             memberService.uploadPhoto(member, photo);
-            return ResponseEntity.ok(Map.of("message", "頭像更新成功"));
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("更新頭像失敗", e);
             return ResponseEntity.internalServerError()

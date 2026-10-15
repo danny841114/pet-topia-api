@@ -31,6 +31,7 @@ public class ShopCartController {
     }
 
     // 會員購物車頁面 => 更改數量直接更新購物車
+    // TODO: HTTP 方法改為 PUT 並將參數改為 Request Body
     @PostMapping("/api/updateCartProductQuantity")
     public ResponseEntity<Cart> updateCartProductQuantity(@RequestParam Integer memberId,
                                                           @RequestParam Integer productId,

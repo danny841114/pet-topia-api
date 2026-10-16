@@ -12,18 +12,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "certification_tag")
+@Table(name = "vendor_tag")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CertificationTag {
+public class VendorTag {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "tag_name", nullable = false, unique = true)
-	private String tagName;
+	@Column(name = "name", nullable = false, unique = true)
+	private String name;
 	
 	@Column(name = "keywords")
     private String keywords;

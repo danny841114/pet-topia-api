@@ -1,7 +1,7 @@
 package petTopia.dto.vendor_admin;
 
 import lombok.*;
-import petTopia.model.vendor.CertificationTag;
+import petTopia.model.vendor.VendorTag;
 import petTopia.model.vendor.Vendor;
 
 import java.util.Date;
@@ -27,7 +27,7 @@ public class VendorCertificationDto {
     @AllArgsConstructor
     public static class TagDto{
         private Integer id;
-        private CertificationTag tag;
+        private VendorTag tag;
         private boolean meetsStandard;
     }
 }

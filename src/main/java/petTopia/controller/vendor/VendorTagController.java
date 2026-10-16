@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import petTopia.model.vendor.VendorCertificationTag;
+import petTopia.model.vendor.VendorTagCertification;
 import petTopia.service.vendor.VendorTagService;
 
 @RequiredArgsConstructor
@@ -16,8 +16,8 @@ public class VendorTagController {
     private final VendorTagService vendorTagService;
 
     @GetMapping("/{vendorId}/tag")
-    public ResponseEntity<List<VendorCertificationTag>> getVendorTagList(@PathVariable Integer vendorId) {
-        List<VendorCertificationTag> tagList = vendorTagService.findConfirmedTagByVendorId(vendorId);
+    public ResponseEntity<List<VendorTagCertification>> getVendorTagList(@PathVariable Integer vendorId) {
+        List<VendorTagCertification> tagList = vendorTagService.findConfirmedTagByVendorId(vendorId);
         return ResponseEntity.ok(tagList);
     }
 }

@@ -160,7 +160,7 @@ INSERT INTO activity_people_number (vendor_activity_id, max_participants, curren
 (16, 25, 1), (17, 70, 0), (18, 55, 1), (19, 30, 1), (20, 40, 1);
 
 -- 插入認證標籤
-INSERT INTO certification_tag (tag_name, keywords) VALUES
+INSERT INTO vendor_tag (name, keywords) VALUES
 ('服務優質', '優質,高級,細心,貼心,專業'),
 ('商品值得信賴', '信賴,放心,可靠,有保障,誠實'),
 ('顧客滿意', '滿意,好評,回購,信賴,超讚'),
@@ -173,24 +173,18 @@ INSERT INTO certification_tag (tag_name, keywords) VALUES
 ('物超所值', '便宜,划算,值得,性價比,優惠');
 
 -- 插入店家認證申請資料
-INSERT INTO vendor_certification (vendor_id, certification_status, reason, request_date, approved_date)
+INSERT INTO vendor_tag_certification (vendor_id, tag_id, status, reason, request_date, approved_date, meets_standard)
 VALUES
-(1, '申請中', NULL, CURRENT_TIMESTAMP, NULL),
-(2, '申請中', NULL, CURRENT_TIMESTAMP, NULL),
-(3, '已認證', '顧客評價高，醫療服務專業', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, '申請中', NULL, CURRENT_TIMESTAMP, NULL),
-(5, '已認證', '優質服務，顧客反饋良好', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(6, '申請中', NULL, CURRENT_TIMESTAMP, NULL),
-(7, '已認證', '顧客評價極高，環境整潔', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(8, '申請中', NULL, CURRENT_TIMESTAMP, NULL),
-(9, '已認證', '寵物攝影服務專業，顧客滿意', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(10, '申請中', NULL, CURRENT_TIMESTAMP, NULL);
-
--- 插入店家認證標語資料
-INSERT INTO vendor_certification_tag (certification_id, tag_id, vendor_id, meets_standard)
-VALUES
-(1, 1, 1, 1), (2, 2, 2, 0), (3, 3, 3, 1), (4, 4, 4, 1), (5, 5, 5, 1),
-(6, 6, 6, 1), (7, 7, 7, 1), (8, 8, 8, 0), (9, 9, 9, 1), (10, 10, 10, 0);
+(1, 1, '申請中', NULL, CURRENT_TIMESTAMP, NULL, 1),
+(2, 2, '申請中', NULL, CURRENT_TIMESTAMP, NULL, 0),
+(3, 3, '已認證', '顧客評價高，醫療服務專業', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1),
+(4, 4, '申請中', NULL, CURRENT_TIMESTAMP, NULL, 1),
+(5, 5, '已認證', '優質服務，顧客反饋良好', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1),
+(6, 6, '申請中', NULL, CURRENT_TIMESTAMP, NULL, 1),
+(7, 7, '已認證', '顧客評價極高，環境整潔', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1),
+(8, 8, '申請中', NULL, CURRENT_TIMESTAMP, NULL, 0),
+(9, 9, '已認證', '寵物攝影服務專業，顧客滿意', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1),
+(10, 10, '申請中', NULL, CURRENT_TIMESTAMP, NULL, 0);
 
 -- 插入通知訊息
 INSERT INTO notification (member_id, vendor_id, vendor_activity_id, notification_title, notification_content, is_read, sent_time)

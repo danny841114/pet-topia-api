@@ -105,15 +105,12 @@ public class Vendor {
 
     @JsonIgnore
     @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VendorCertification> certifications;
+    private List<VendorTagCertification> vendorTagCertifications;
 
     @JsonIgnore
     @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VendorActivity> activities;
 
-//    @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<VendorReview> reviews;
-//    
 //    @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<Notification> notifications;
 

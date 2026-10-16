@@ -6,49 +6,44 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import petTopia.dto.vendor_admin.VendorCertificationDto;
-import petTopia.model.vendor.CertificationTag;
-import petTopia.service.vendor_admin.VendorCertificationService;
-import petTopia.service.vendor_admin.VendorCertificationTagService;
+import petTopia.dto.vendor_admin.TagCertificationDto;
+import petTopia.model.vendor.VendorTag;
+import petTopia.service.vendor_admin.VendorTagAdminService;
 
 @RequiredArgsConstructor
 @RestController
 public class VendorCertificationController {
-    private final VendorCertificationService vendorCertificationService;
-    private final VendorCertificationTagService vendorCertificationTagService;
+    private final VendorTagAdminService vendorTagAdminService;
 
-    // TODO: Response body should be modified
     @PostMapping("/api/vendor_admin/certification/add")
     public ResponseEntity<String> AddCertification(@RequestParam Integer vendorId, @RequestParam Integer tagId) {
-        vendorCertificationService.createVendorCertificationWithTag(vendorId, tagId);
-        return ResponseEntity.ok("申请已提交成功！");
+        vendorTagAdminService.createVendorCertificationWithTag(vendorId, tagId);
+        return ResponseEntity.ok().build();
     }
 
     // TODO: Response body should be modified
     @GetMapping("/api/vendor_admin/certification/exists/{vendorId}/{certificationTagId}")
     public ResponseEntity<Map<String, Object>> checkIfExists(@PathVariable Integer vendorId,
                                                              @PathVariable Integer certificationTagId) {
-        boolean exists = vendorCertificationTagService.checkIfExists(vendorId, certificationTagId);
+        boolean exists = vendorTagAdminService.checkIfExists(vendorId, certificationTagId);
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 
     @GetMapping("/api/certification_type/all")
-    public ResponseEntity<List<CertificationTag>> getAllCertificationTypes() {
-        List<CertificationTag> certificationTypes = vendorCertificationService.getAllCertificationTypes();
+    public ResponseEntity<List<VendorTag>> getAllCertificationTypes() {
+        List<VendorTag> certificationTypes = vendorTagAdminService.getAllVendorTags();
         return ResponseEntity.ok(certificationTypes);
     }
 
-    // TODO: this method is not modified
     @GetMapping("/api/vendor_admin/certification/{vendorId}")
-    public ResponseEntity<List<VendorCertificationDto>> getCertificationByVendorId(@PathVariable Integer vendorId) {
-        List<VendorCertificationDto> certificationDto = vendorCertificationService.getCertificationByVendorId(vendorId);
-        return ResponseEntity.ok(certificationDto);
+    public ResponseEntity<List<TagCertificationDto>> getCertificationsByVendorId(@PathVariable Integer vendorId) {
+        List<TagCertificationDto> certifications = vendorTagAdminService.getCertificationsByVendorId(vendorId);
+        return ResponseEntity.ok(certifications);
     }
 
-    // TODO: Response body should be modified
     @DeleteMapping("/api/vendor_admin/certification/delete/{certificationId}")
-    public ResponseEntity<String> cancelCertification(@PathVariable Integer certificationId) {
-        vendorCertificationService.cancelCertificationById(certificationId);
-        return ResponseEntity.ok("認證申請已取消");
+    public ResponseEntity<Void> cancelCertification(@PathVariable Integer certificationId) {
+        vendorTagAdminService.cancelCertificationById(certificationId);
+        return ResponseEntity.ok().build();
     }
 }

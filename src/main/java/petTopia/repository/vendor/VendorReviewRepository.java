@@ -23,14 +23,16 @@ public interface VendorReviewRepository extends JpaRepository<VendorReview, Inte
     List<VendorReview> findByMemberId(Integer memberId);
 
     @Query("""
-            SELECT COUNT(vr) FROM VendorReview vr
-            WHERE vr.vendor.id = :vendorId
-            AND (vr.reviewContent LIKE %:keyword1%
-                 OR vr.reviewContent LIKE %:keyword2%
-                 OR vr.reviewContent LIKE %:keyword3%
-                 OR vr.reviewContent LIKE %:keyword4%
-                 OR vr.reviewContent LIKE %:keyword5%)
-            """)
+        SELECT COUNT(vr) FROM VendorReview vr
+        WHERE vr.vendor.id = :vendorId
+        AND (
+            (:keyword1 IS NOT NULL AND :keyword1 != '' AND vr.reviewContent LIKE CONCAT('%', :keyword1, '%')) OR
+            (:keyword2 IS NOT NULL AND :keyword2 != '' AND vr.reviewContent LIKE CONCAT('%', :keyword2, '%')) OR
+            (:keyword3 IS NOT NULL AND :keyword3 != '' AND vr.reviewContent LIKE CONCAT('%', :keyword3, '%')) OR
+            (:keyword4 IS NOT NULL AND :keyword4 != '' AND vr.reviewContent LIKE CONCAT('%', :keyword4, '%')) OR
+            (:keyword5 IS NOT NULL AND :keyword5 != '' AND vr.reviewContent LIKE CONCAT('%', :keyword5, '%'))
+        )
+        """)
     int countMatchingReviews(@Param("vendorId") Integer vendorId,
                              @Param("keyword1") String keyword1,
                              @Param("keyword2") String keyword2,

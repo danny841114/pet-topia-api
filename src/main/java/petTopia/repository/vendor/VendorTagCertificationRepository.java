@@ -6,9 +6,10 @@ import org.springframework.data.repository.query.Param;
 import petTopia.model.vendor.VendorTagCertification;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VendorTagCertificationRepository extends JpaRepository<VendorTagCertification, Integer> {
-    boolean existsByVendorIdAndTagId(int vendorId, int certificationTagId);
+    Optional<VendorTagCertification> findByVendorIdAndTagId(Integer vendorId, Integer tagId);
 
     List<VendorTagCertification> findByVendorId(Integer vendorId);
 

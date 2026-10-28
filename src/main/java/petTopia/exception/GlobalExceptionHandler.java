@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<CustomErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        log.error("INVALID PARAMETER", ex);
+        log.error("INVALID PARAMETER: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoSuchAlgorithmException.class)
-    public ResponseEntity<CustomErrorResponse> handleIllegalAlgorithm(NoSuchAlgorithmException ex) {
-        log.error("NO SUCH ALGORITHM", ex);
+    public ResponseEntity<CustomErrorResponse> handleNoSuchAlgorithm(NoSuchAlgorithmException ex) {
+        log.error("NO SUCH ALGORITHM: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -51,8 +51,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnsupportedEncodingException.class)
-    public ResponseEntity<CustomErrorResponse> handleIllegalAlgorithm(UnsupportedEncodingException ex) {
-        log.error("UNSUPPORTED ENCODING", ex);
+    public ResponseEntity<CustomErrorResponse> handleUnsupportedEncoding(UnsupportedEncodingException ex) {
+        log.error("UNSUPPORTED ENCODING: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -65,8 +65,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ParseException.class)
-    public ResponseEntity<CustomErrorResponse> handleIllegalAlgorithm(ParseException ex) {
-        log.error("PARSE EXCEPTION", ex);
+    public ResponseEntity<CustomErrorResponse> handleParseException(ParseException ex) {
+        log.error("PARSE EXCEPTION: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<CustomErrorResponse> handleBadCredentials(BadCredentialsException ex) {
-        log.error("BAD CREDENTIAL", ex);
+        log.warn("BAD CREDENTIALS: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
@@ -93,8 +93,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<CustomErrorResponse> handleUserNotFound(UsernameNotFoundException ex) {
-        log.error("USER NOT FOUND", ex);
+    public ResponseEntity<CustomErrorResponse> handleUsernameNotFound(UsernameNotFoundException ex) {
+        log.error("USER NOT FOUND: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
@@ -107,8 +107,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<CustomErrorResponse> handleAuthorization(AccessDeniedException ex) {
-        log.error("FORBIDDEN", ex);
+    public ResponseEntity<CustomErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("FORBIDDEN: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
@@ -121,8 +121,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<CustomErrorResponse> handleDeniedAuthorization(AuthorizationDeniedException ex) {
-        log.error("AUTHORIZATION DENIED", ex);
+    public ResponseEntity<CustomErrorResponse> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        log.error("AUTHORIZATION DENIED: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
@@ -136,7 +136,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<CustomErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
-        log.error("ENTITY NOT FOUND", ex);
+        log.error("ENTITY NOT FOUND: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
@@ -150,7 +150,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<CustomErrorResponse> handleRuntimeError(RuntimeException ex) {
-        log.error("SYSTEM ERROR", ex);
+        log.error("SYSTEM ERROR: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -163,22 +163,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AlreadyReviewedException.class)
-    public ResponseEntity<CustomErrorResponse> handleAlreadyReview(AlreadyReviewedException ex) {
-        log.error("ALREADY REVIEW", ex);
+    public ResponseEntity<CustomErrorResponse> handleAlreadyReviewed(AlreadyReviewedException ex) {
+        log.warn("ALREADY REVIEWED EXCEPTION: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .code("ALREADY REVIEW")
+                .status(HttpStatus.FORBIDDEN.value())
+                .code("ALREADY REVIEWED")
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        return ResponseEntity.internalServerError().body(response);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<CustomErrorResponse> handleRuntimeError(IOException ex) {
-        log.error("IO ERROR", ex);
+    public ResponseEntity<CustomErrorResponse> handleIOException(IOException ex) {
+        log.error("IO ERROR: {}", ex.getMessage());
 
         CustomErrorResponse response = CustomErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())

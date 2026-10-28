@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
 @Setter
@@ -31,7 +32,7 @@ public class Member {
     @MapsId
     @JoinColumn(name = "id")
     @JsonIgnore
-    private User user; // 用這個屬性來建立與 Users 的關聯
+    private User user;
 
     @Column(name = "name")
     private String name;
@@ -54,6 +55,7 @@ public class Member {
     @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private Boolean status = false; // 預設為未認證 (0)
 
+    @UpdateTimestamp
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 

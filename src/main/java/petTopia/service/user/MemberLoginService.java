@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +22,7 @@ import petTopia.repository.user.UserRepository;
 import petTopia.repository.user.MemberRepository;
 import petTopia.util.StringHelper;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -40,116 +41,64 @@ public class MemberLoginService {
     private static final String FRONTEND_URL = "http://localhost:5173";
 
     @Transactional
-    public LoginResponse memberLogin(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         String email = request.getEmail();
         String password = request.getPassword();
 
         if (email == null || password == null) {
+            log.warn("Email or password is null");
             throw new IllegalArgumentException("Email or password is null");
         }
 
-        log.info("開始會員登入流程，email: {}", email);
+        User user = usersRepository.findByEmailAndUserRole(email, User.UserRole.MEMBER)
+                .orElseThrow(() -> new BadCredentialsException("User not found with '%s'".formatted(email)));
+        Integer userId = user.getId();
 
-        try {
-            Optional<User> userOptional = usersRepository.findByEmailAndUserRole(email, User.UserRole.MEMBER);
-
-            if (userOptional.isEmpty()) {
-                log.warn("登入失敗：會員帳號不存在，email: {}", email);
-
-                return LoginResponse.builder()
-                        .success(false)
-                        .message("會員帳號不存在")
-                        .build();
-            }
-
-            User user = userOptional.get();
-
-            // 檢查是否是第三方登入帳號且未啟用本地密碼
-            if (user.getProvider() != User.Provider.LOCAL && !user.getLocalEnabled()) {
-                log.warn("登入失敗：第三方登入帳號嘗試使用密碼登入，userId: {}, provider: {}", user.getId(), user.getProvider().name());
-
-                return LoginResponse.builder()
-                        .error("此帳號是使用" + user.getProvider().toString() + "註冊的，請使用對應的登入方式，或設定本地密碼")
-                        .isThirdPartyAccount(true)
-                        .provider(user.getProvider().name())
-                        .email(user.getEmail())
-                        .build();
-            }
-
-            if (!passwordEncoder.matches(password, user.getPassword())) {
-                log.warn("登入失敗：密碼錯誤，userId: {}", user.getId());
-
-                return LoginResponse.builder()
-                        .success(false)
-                        .message("密碼錯誤")
-                        .build();
-            }
-
-            // 檢查郵箱驗證狀態
-            if (!user.isEmailVerified()) {
-                log.warn("登入失敗：郵箱未驗證，userId: {}", user.getId());
-
-                return LoginResponse.builder()
-                        .success(false)
-                        .message("您的郵箱尚未驗證，請查收驗證郵件並完成驗證")
-                        .needVerification(true)
-                        .build();
-            }
-
-            // 獲取會員信息
-            log.info("會員登入成功，userId: {}, email: {}", user.getId(), user.getEmail());
-
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
-            Authentication authentication = authenticationManager.authenticate(authToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getUserRole().toString());
-
-            Member member = memberRepository.findById(user.getId()).orElse(null);
-
-            if (member == null) {
-                member = new Member();
-
-                member.setId(user.getId());
-                member.setUser(user);
-                member.setName(email.split("@")[0]);    // 使用友好的顯示名稱
-                member.setStatus(false);
-
-                member = memberService.createOrUpdateMember(member);
-            }
-
-            // 檢查名稱是否為郵箱格式
-            String displayName = member.getName();
-            if (StringHelper.isEmailFormat(displayName, email)) {
-                displayName = email.split("@")[0];
-
-                // 如果名稱已更改，更新資料庫
-                if (!displayName.equals(member.getName())) {
-                    member.setName(displayName);
-                    memberService.createOrUpdateMember(member);
-                }
-            }
-
-            return LoginResponse.builder()
-                    .success(true)
-                    .token(token)
-                    .userId(user.getId())
-                    .email(user.getEmail())
-                    .memberId(member.getId())
-                    .name(displayName)
-                    .memberName(displayName)
-                    .role(user.getProvider().name())
-                    .provider(user.getProvider().name())
-                    .message("登入成功")
-                    .build();
-        } catch (Exception e) {
-            log.error("會員登入過程發生錯誤", e);
-
-            return LoginResponse.builder()
-                    .success(false)
-                    .message("登入失敗：" + e.getMessage())
-                    .build();
+        if (user.getProvider() != User.Provider.LOCAL && !user.getLocalEnabled()) {
+            log.warn("This user is not allowed to login by password, userId: {}, provider: {}", userId, user.getProvider().name());
+            throw new BadCredentialsException("This user is not allowed to login by password");
         }
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            log.warn("Login failed with wrong password, userId: {}", userId);
+            throw new BadCredentialsException("Login failed with wrong password");
+        }
+
+        if (!user.isEmailVerified()) {
+            log.warn("Login failed with email not verified, userId: {}", userId);
+            throw new BadCredentialsException("Login failed with email not verified, userId: %s".formatted(userId));
+        }
+
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authentication = authenticationManager.authenticate(authToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token = jwtUtil.generateToken(email, userId, user.getUserRole().toString());
+
+        Member member = memberRepository.findById(userId).orElse(null);
+
+        if (member == null) {
+            Member newMember = new Member();
+
+            newMember.setId(userId);
+            newMember.setUser(user);
+            newMember.setName(email.split("@")[0]);
+            newMember.setStatus(false);
+            newMember.setUpdatedDate(LocalDateTime.now());
+
+            memberRepository.save(newMember);
+        }
+
+        String displayName = member != null ? member.getName() : email.split("@")[0];
+
+        return LoginResponse.builder()
+                .token(token)
+                .userId(userId)
+                .email(email)
+                .name(displayName)
+                .role(user.getProvider().name())
+                .provider(user.getProvider().name())
+                .build();
     }
 
     public RedirectView oauth2Callback(String email) {

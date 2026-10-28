@@ -22,26 +22,15 @@ public class MemberLoginController {
     private final MemberLoginService memberLoginService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest credentials) {
-        try {
-            LoginResponse loginResult = memberLoginService.memberLogin(credentials);
-            if (loginResult.getSuccess()) {
-                return ResponseEntity.ok(loginResult);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", loginResult.getMessage()));
-            }
-        } catch (Exception e) {
-            log.error("登入失敗", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "登入失敗: " + e.getMessage()));
-        }
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse loginResult = memberLoginService.login(request);
+        return ResponseEntity.ok(loginResult);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<Void> logout() {
         SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(Map.of("message", "登出成功"));
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/status")

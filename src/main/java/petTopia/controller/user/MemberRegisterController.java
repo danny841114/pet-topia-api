@@ -13,10 +13,10 @@ import petTopia.dto.user.request.VerifyCodeRequest;
 import petTopia.model.user.User;
 import petTopia.service.user.EmailService;
 import petTopia.service.user.RegistrationService;
+import petTopia.service.user.VerificationCodeService;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +25,7 @@ import java.util.Random;
 public class MemberRegisterController {
     private final RegistrationService registrationService;
     private final EmailService emailService;
+    private final VerificationCodeService verificationCodeService;
 
     private Map<String, Map<String, Object>> verificationCodes = new HashMap<>();
 
@@ -38,37 +39,12 @@ public class MemberRegisterController {
     @PostMapping("/send-verification")
     public ResponseEntity<?> sendVerificationCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
+        if (email == null || email.trim().isEmpty()) throw new IllegalArgumentException("Email is not valid");
 
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "電子郵件不能為空"));
-        }
+        String code = verificationCodeService.generateAndSaveCode(email);
+        emailService.sendVerificationCode(email, code);
 
-        log.info("發送驗證碼 - 電子郵件: {}", email);
-
-        try {
-            // 生成6位數驗證碼
-            String code = String.format("%06d", new Random().nextInt(1000000));
-
-            // 存儲驗證碼和時間戳
-            Map<String, Object> codeData = new HashMap<>();
-            codeData.put("code", code);
-            codeData.put("timestamp", System.currentTimeMillis());
-            verificationCodes.put(email, codeData);
-
-            // 發送驗證碼到郵箱
-            emailService.sendVerificationCode(email, code);
-
-            log.info("驗證碼發送成功 - 電子郵件: {}", email);
-            return ResponseEntity.ok(Map.of(
-                    "message", "驗證碼已發送",
-                    "email", email
-            ));
-        } catch (Exception e) {
-            log.error("驗證碼發送失敗 - 電子郵件: {}", email, e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "驗證碼發送失敗：" + e.getMessage()));
-        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify-code")

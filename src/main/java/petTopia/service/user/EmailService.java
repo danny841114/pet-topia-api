@@ -16,28 +16,36 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
     @Async
-    public void sendVerificationEmail(String to, String code) {
+    public void sendVerificationEmail(String email, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(email);
+        message.setSubject("PetTopia 會員註冊驗證碼");
+        message.setText("您的驗證碼是: " + code + "\n\n此驗證碼將在5分鐘後過期。");
+
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(to);
-            message.setSubject("PetTopia 會員註冊驗證碼");
-            message.setText("您的驗證碼是: " + code + "\n\n此驗證碼將在5分鐘後過期。");
-
             mailSender.send(message);
-
-            log.error("發送驗證信成功, 收信人: {}", to);
+            log.error("發送驗證信成功, 收信人: {}", email);
         } catch (Exception e) {
-            log.error("發送驗證信失敗, 收信人: {}", to);
+            log.error("發送驗證信失敗, 收信人: {}", email);
+            throw new RuntimeException("Send verification code failed");
         }
     }
 
-    public void sendVerificationCode(String to, String code) {
+    public void sendVerificationCode(String email, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Waggy商家註冊驗證碼");
+
+        message.setTo(email);
+        message.setSubject("商家註冊驗證碼");
         message.setText("您的驗證碼是: " + code + "\n\n此驗證碼將在5分鐘後過期。");
 
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+            log.info("Send verification code successfully, email: {}", email);
+        } catch (Exception e) {
+            log.error("Send verification code failed, email: {}", email);
+            throw new RuntimeException("Send verification code failed");
+        }
     }
 
     public void sendHtmlEmail(String to, String subject, String htmlContent) {

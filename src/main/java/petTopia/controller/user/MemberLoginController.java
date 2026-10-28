@@ -34,19 +34,8 @@ public class MemberLoginController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<?> getLoginStatus(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.ok(Map.of("isLoggedIn", false));
-        }
-
-        String token = authHeader.substring(7);
-        try {
-            LoginStatus loginStatus = memberLoginService.getLoginStatus(token);
-            return ResponseEntity.ok(loginStatus);
-        } catch (Exception e) {
-            log.error("獲取登入狀態失敗", e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "獲取登入狀態失敗: " + e.getMessage()));
-        }
+    public ResponseEntity<LoginStatus> getLoginStatus(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        LoginStatus loginStatus = memberLoginService.getLoginStatus(authHeader);
+        return ResponseEntity.ok(loginStatus);
     }
 }

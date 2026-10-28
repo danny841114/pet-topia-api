@@ -3,6 +3,7 @@ package petTopia.service.user;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import petTopia.repository.user.MemberRepository;
 import petTopia.util.StringHelper;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -135,28 +137,20 @@ public class MemberLoginService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
-    public LoginStatus getLoginStatus(String token) {
+    public LoginStatus getLoginStatus(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new BadCredentialsException("Header authorization is invalid");
+        }
+
+        String token = authHeader.substring(7);
         String email = jwtUtil.extractUsername(token);
-        if (!jwtUtil.validateToken(token, email)) return getFailedLoginStatus();
+        if (!jwtUtil.validateToken(token, email)) throw new BadCredentialsException("Token is invalid");
 
         Integer userId = jwtUtil.extractUserId(token);
-        Member member = memberRepository.findById(userId).orElse(null);
-        if (member == null) return getFailedLoginStatus();
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        User user = usersRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        User user = this.findByEmail(email);
-
-        // 檢查名稱是否為郵箱格式，如果是則使用更友好的格式
         String displayName = member.getName();
-        if (user != null && user.getProvider() != User.Provider.LOCAL && StringHelper.isEmailFormat(displayName, email)) {
-            displayName = email.split("@")[0];
-
-            // 如果名稱已更改，更新資料庫
-            if (!displayName.equals(member.getName())) {
-                log.info("更新會員資料中的名稱為更友好的格式: {} -> {}", member.getName(), displayName);
-                member.setName(displayName);
-                memberService.createOrUpdateMember(member);
-            }
-        }
 
         return LoginStatus.builder()
                 .isLoggedIn(true)
@@ -165,13 +159,7 @@ public class MemberLoginService {
                 .name(displayName)
                 .memberName(displayName)
                 .role(jwtUtil.extractUserRole(token))
-                .provider(user != null ? user.getProvider().toString() : null)
-                .build();
-    }
-
-    private LoginStatus getFailedLoginStatus() {
-        return LoginStatus.builder()
-                .isLoggedIn(false)
+                .provider(user.getProvider().toString())
                 .build();
     }
 }

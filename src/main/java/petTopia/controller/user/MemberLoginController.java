@@ -4,15 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import petTopia.dto.user.request.LoginRequest;
 import petTopia.dto.user.response.LoginResponse;
 import petTopia.dto.user.response.LoginStatus;
 import petTopia.service.user.MemberLoginService;
-
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor

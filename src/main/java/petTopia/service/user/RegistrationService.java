@@ -1,16 +1,17 @@
 package petTopia.service.user;
 
+import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import petTopia.dto.user.request.RegisterRequest;
 import petTopia.dto.user.response.CheckEmailResponse;
 import petTopia.model.user.User;
 import petTopia.model.user.Member;
@@ -24,69 +25,45 @@ import petTopia.repository.user.MemberRepository;
 public class RegistrationService {
     private final UserRepository usersRepository;
     private final MemberRepository memberRepository;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Map<String, Object> register(String email, String password) {
-        Map<String, Object> result = new HashMap<>();
+    public String register(RegisterRequest request) {
+        String email = request.getEmail();
+        String password = request.getPassword();
+        String confirmPassword = request.getConfirmPassword();
 
-        try {
-            User user = new User();
+        if (email == null || email.trim().isEmpty()) throw new InvalidParameterException("Email is invalid");
+        if (password == null || password.trim().isEmpty()) throw new InvalidParameterException("Password is invalid");
+        if (!password.equals(confirmPassword)) throw new InvalidParameterException("Confirm password is invalid");
 
-            // 檢查郵箱是否已存在
-            String trimmedEmail = email.toLowerCase().trim();
-            if (findByEmail(trimmedEmail) != null) {
-                result.put("success", false);
-                result.put("message", "此 email 已註冊為會員");
-                return result;
-            }
-            user.setEmail(trimmedEmail);
+        String trimmedEmail = email.toLowerCase().trim();
+        if (usersRepository.findByEmailAndUserRole(trimmedEmail, User.UserRole.MEMBER).isPresent())
+            throw new BadCredentialsException("This email has been registered");
 
-            // 生成6位數驗證碼
-            String code = String.format("%06d", new Random().nextInt(1000000));
-            user.setVerificationToken(code);
-            user.setTokenExpiry(LocalDateTime.now().plusMinutes(5));
+        User user = new User();
+        user.setEmail(trimmedEmail);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setUserRole(User.UserRole.MEMBER);
+        user.setProvider(User.Provider.LOCAL);
 
-            // 身分屬性
-            user.setUserRole(User.UserRole.MEMBER);
-            user.setProvider(User.Provider.LOCAL);
+        // 生成6位數驗證碼
+        String code = String.format("%06d", new Random().nextInt(1000000));
+        user.setVerificationToken(code);
+        user.setTokenExpiry(LocalDateTime.now().plusMinutes(5));
 
-            // 加密密碼
-            String encodedPassword = passwordEncoder.encode(password);
-            user.setPassword(encodedPassword);
+        usersRepository.save(user);
+        log.info("User has been added, userId: {}", user.getId());
 
-            // 保存用戶
-            usersRepository.save(user);
-            log.info("會員用戶資訊儲存成功，userId: {}", user.getId());
+        Member member = new Member();
+        member.setUser(user);
+        member.setStatus(false);
+        member.setUpdatedDate(LocalDateTime.now());
 
-            // 創建會員資料
-            Member member = new Member();
-            member.setUser(user);
-            member.setName("");
-            member.setPhone("");
-            member.setStatus(false);
-            member.setUpdatedDate(LocalDateTime.now());
+        memberRepository.save(member);
+        log.info("Member has been added, memberId: {}", member.getId());
 
-            // 保存會員資料
-            memberRepository.save(member);
-            log.info("會員詳細資訊儲存成功，memberId: {}", member.getId());
-
-            // 發送驗證郵件
-            emailService.sendVerificationEmail(user.getEmail(), code);
-            log.info("驗證郵件發送成功，email: {}", user.getEmail());
-
-            result.put("success", true);
-            result.put("message", "註冊成功，請查收驗證郵件");
-            result.put("userId", user.getId());
-            result.put("memberId", member.getId());
-        } catch (Exception e) {
-            log.error("會員註冊過程發生錯誤", e);
-            result.put("success", false);
-            result.put("message", "註冊失敗：" + e.getMessage());
-        }
-
-        return result;
+        return code;
     }
 
     @Transactional

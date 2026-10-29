@@ -21,4 +21,22 @@ public class VerificationCodeService {
         log.info("Verification code has been generated, email: {}, code: {}", email, code);
         return code;
     }
+
+    public boolean verifyCode(String email, String code) {
+        VerificationData data = storage.get(email);
+
+        if (data == null) return false;
+
+        if (data.isExpired(EXPIRATION_TIME)) {
+            storage.remove(email);
+            return false;
+        }
+
+        if (code.equals(data.getCode())) {
+            storage.remove(email);
+            return true;
+        }
+
+        return false;
+    }
 }

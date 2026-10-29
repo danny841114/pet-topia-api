@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -94,29 +95,26 @@ public class RegistrationService {
         return false;
     }
 
-    public User findByEmail(String email) {
+    private User findByEmail(String email) {
         // 查找任何類型的帳號（會員、商家、本地、Google）
         String trimmedEmail = email.toLowerCase().trim();
         return usersRepository.findByEmailAndUserRole(trimmedEmail, User.UserRole.MEMBER)
-                .orElse(null);
+                .orElseThrow(() -> new EntityNotFoundException("User with email '%s' not found".formatted(email)));
     }
 
     @Transactional
-    public void updateUser(User user) {
-        // 保存用戶信息
-        log.info("更新用戶信息，userId: {}", user.getId());
+    public void updateUserEmailVerified(String email) {
+        User user = this.findByEmail(email);
+        user.setEmailVerified(true);
         usersRepository.save(user);
     }
 
     public CheckEmailResponse checkEmailIsRegistered(String email) {
-        log.info("檢查 email 是否已存在 - email: {}", email);
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email is null or blank");
 
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("檢查 email 失敗 - email 為空");
-        }
+        try {
+            User existingUser = this.findByEmail(email);
 
-        User existingUser = this.findByEmail(email);
-        if (existingUser != null) {
             String message;
             if (existingUser.getProvider() == User.Provider.GOOGLE) {
                 message = "此 email 已使用 Google 帳號登入過，請點擊「使用 Google 登入」按鈕";
@@ -134,7 +132,7 @@ public class RegistrationService {
                     .userRole(existingUser.getUserRole())
                     .provider(existingUser.getProvider())
                     .build();
-        } else {
+        } catch (Exception e) {
             log.info("Email 可用 - email: {}", email);
 
             return CheckEmailResponse.builder()

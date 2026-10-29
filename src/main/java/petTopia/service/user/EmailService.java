@@ -25,9 +25,9 @@ public class EmailService {
 
         try {
             mailSender.send(message);
-            log.error("發送驗證信成功, 收信人: {}", email);
+            log.info("Send registration verification code successfully, email: {}", email);
         } catch (Exception e) {
-            log.error("發送驗證信失敗, 收信人: {}", email);
+            log.error("Send registration verification code failed, email: {}", email);
             throw new RuntimeException("Send verification code failed");
         }
     }

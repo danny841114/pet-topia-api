@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import petTopia.dto.user.response.EmailStatus;
 import petTopia.model.user.User;
 import petTopia.service.user.EmailService;
 import petTopia.service.user.MemberLoginService;
@@ -35,23 +36,9 @@ public class LocalPasswordController {
      * 檢查用戶是否可以設置本地密碼。
      */
     @GetMapping("/check")
-    public ResponseEntity<?> checkEmailStatus(@RequestParam String email) {
-        User user = memberLoginService.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "找不到會員帳號"));
-        }
-
-        if (user.getProvider() == User.Provider.LOCAL) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "此帳號已是本地帳號"));
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "email", email,
-                "provider", user.getProvider(),
-                "canSetupLocalPassword", true
-        ));
+    public ResponseEntity<EmailStatus> checkEmailStatus(@RequestParam String email) {
+        EmailStatus emailStatus = memberLoginService.checkEmailStatus(email);
+        return ResponseEntity.ok(emailStatus);
     }
 
     /**

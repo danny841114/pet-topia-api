@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.view.RedirectView;
 import petTopia.dto.user.request.LoginRequest;
+import petTopia.dto.user.response.EmailStatus;
 import petTopia.dto.user.response.LoginResponse;
 import petTopia.dto.user.response.LoginStatus;
 import petTopia.jwt.JwtUtil;
@@ -58,7 +60,15 @@ public class MemberLoginService {
 
         if (user.getProvider() != User.Provider.LOCAL && !user.getLocalEnabled()) {
             log.warn("This user is not allowed to login by password, userId: {}, provider: {}", userId, user.getProvider().name());
-            throw new BadCredentialsException("This user is not allowed to login by password");
+
+            return LoginResponse.builder()
+                    .userId(userId)
+                    .email(email)
+                    .role(user.getProvider().name())
+                    .provider(user.getProvider().name())
+                    .isLocalEnabled(false)
+                    .error("This user is not allowed to login by password")
+                    .build();
         }
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
@@ -100,6 +110,7 @@ public class MemberLoginService {
                 .name(displayName)
                 .role(user.getProvider().name())
                 .provider(user.getProvider().name())
+                .success(true)
                 .build();
     }
 
@@ -160,6 +171,21 @@ public class MemberLoginService {
                 .memberName(displayName)
                 .role(jwtUtil.extractUserRole(token))
                 .provider(user.getProvider().toString())
+                .build();
+    }
+
+    public EmailStatus checkEmailStatus(String email) {
+        User user = this.findByEmail(email);
+
+        if (user == null) throw new EntityNotFoundException("Email not found");
+
+        if (user.getProvider() == User.Provider.LOCAL)
+            throw new AuthorizationDeniedException("This email has already been set password");
+
+        return EmailStatus.builder()
+                .email(email)
+                .provider(user.getProvider().toString())
+                .canSetupLocalPassword(true)
                 .build();
     }
 }

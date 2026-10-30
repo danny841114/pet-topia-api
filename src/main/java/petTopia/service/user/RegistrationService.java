@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import petTopia.dto.user.request.RegisterRequest;
-import petTopia.dto.user.response.CheckEmailResponse;
 import petTopia.model.user.User;
 import petTopia.model.user.Member;
 import petTopia.repository.user.UserRepository;
@@ -95,13 +94,6 @@ public class RegistrationService {
         return false;
     }
 
-    private User findByEmail(String email) {
-        // 查找任何類型的帳號（會員、商家、本地、Google）
-        String trimmedEmail = email.toLowerCase().trim();
-        return usersRepository.findByEmailAndUserRole(trimmedEmail, User.UserRole.MEMBER)
-                .orElseThrow(() -> new EntityNotFoundException("User with email '%s' not found".formatted(email)));
-    }
-
     @Transactional
     public void updateUserEmailVerified(String email) {
         User user = this.findByEmail(email);
@@ -109,36 +101,43 @@ public class RegistrationService {
         usersRepository.save(user);
     }
 
-    public CheckEmailResponse checkEmailIsRegistered(String email) {
-        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email is null or blank");
-
-        try {
-            User existingUser = this.findByEmail(email);
-
-            String message;
-            if (existingUser.getProvider() == User.Provider.GOOGLE) {
-                message = "此 email 已使用 Google 帳號登入過，請點擊「使用 Google 登入」按鈕";
-            } else if (existingUser.getUserRole() == User.UserRole.VENDOR) {
-                message = "此 email 已註冊為商家帳號，請使用其他 email 註冊會員";
-            } else {
-                message = "此 email 已註冊為會員帳號，請直接登入";
-            }
-
-            log.info("Email 已存在 - email: {}, 用戶類型: {}", email, existingUser.getUserRole());
-
-            return CheckEmailResponse.builder()
-                    .exists(true)
-                    .message(message)
-                    .userRole(existingUser.getUserRole())
-                    .provider(existingUser.getProvider())
-                    .build();
-        } catch (Exception e) {
-            log.info("Email 可用 - email: {}", email);
-
-            return CheckEmailResponse.builder()
-                    .exists(true)
-                    .message("此 email 可用於註冊")
-                    .build();
-        }
+    private User findByEmail(String email) {
+        // 查找任何類型的帳號（會員、商家、本地、Google）
+        String trimmedEmail = email.toLowerCase().trim();
+        return usersRepository.findByEmailAndUserRole(trimmedEmail, User.UserRole.MEMBER)
+                .orElseThrow(() -> new EntityNotFoundException("User with email '%s' not found".formatted(email)));
     }
+
+//    public CheckEmailResponse checkEmailIsRegistered(String email) {
+//        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email is null or blank");
+//
+//        try {
+//            User existingUser = this.findByEmail(email);
+//
+//            String message;
+//            if (existingUser.getProvider() == User.Provider.GOOGLE) {
+//                message = "此 email 已使用 Google 帳號登入過，請點擊「使用 Google 登入」按鈕";
+//            } else if (existingUser.getUserRole() == User.UserRole.VENDOR) {
+//                message = "此 email 已註冊為商家帳號，請使用其他 email 註冊會員";
+//            } else {
+//                message = "此 email 已註冊為會員帳號，請直接登入";
+//            }
+//
+//            log.info("Email 已存在 - email: {}, 用戶類型: {}", email, existingUser.getUserRole());
+//
+//            return CheckEmailResponse.builder()
+//                    .exists(true)
+//                    .message(message)
+//                    .userRole(existingUser.getUserRole())
+//                    .provider(existingUser.getProvider())
+//                    .build();
+//        } catch (Exception e) {
+//            log.info("Email 可用 - email: {}", email);
+//
+//            return CheckEmailResponse.builder()
+//                    .exists(true)
+//                    .message("此 email 可用於註冊")
+//                    .build();
+//        }
+//    }
 }

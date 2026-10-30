@@ -20,23 +20,7 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(email);
-        message.setSubject("PetTopia 會員註冊驗證碼");
-        message.setText("您的驗證碼是: " + code + "\n\n此驗證碼將在5分鐘後過期。");
-
-        try {
-            mailSender.send(message);
-            log.info("Send registration verification code successfully, email: {}", email);
-        } catch (Exception e) {
-            log.error("Send registration verification code failed, email: {}", email);
-            throw new RuntimeException("Send verification code failed");
-        }
-    }
-
-    public void sendVerificationCode(String email, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-
-        message.setTo(email);
-        message.setSubject("商家註冊驗證碼");
+        message.setSubject("PetTopia 驗證碼");
         message.setText("您的驗證碼是: " + code + "\n\n此驗證碼將在5分鐘後過期。");
 
         try {

@@ -126,18 +126,13 @@ public class MemberService {
         String email = request.getEmail();
         String newPassword = request.getNewPassword();
 
-        if (email == null || newPassword == null) {
-            throw new IllegalArgumentException("電子郵件和密碼不能為空");
-        }
+        if (email == null || newPassword == null) throw new IllegalArgumentException("Email or password is blank");
 
         User user = userRepository.findByEmailAndUserRole(email, User.UserRole.MEMBER)
                 .orElseThrow(() -> new EntityNotFoundException("User with email '%s' not found".formatted(email)));
 
         user.setPassword(passwordEncoder.encode(newPassword));
-
         userRepository.save(user);
-
-        log.info("用戶 {} 密碼更改成功", email);
     }
 
     public byte[] getProfilePhotoById(Integer memberId) {

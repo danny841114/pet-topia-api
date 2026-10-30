@@ -34,12 +34,12 @@ public class MemberRegisterController {
     }
 
     @PostMapping("/send-verification")
-    public ResponseEntity<?> sendVerificationCode(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Void> sendVerificationCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         if (email == null || email.trim().isEmpty()) throw new IllegalArgumentException("Email is not valid");
 
         String code = verificationCodeService.generateAndSaveCode(email);
-        emailService.sendVerificationCode(email, code);
+        emailService.sendVerificationEmail(email, code);
 
         return ResponseEntity.ok().build();
     }
